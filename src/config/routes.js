@@ -112,8 +112,8 @@ const FIRSTPAGE = createBottomTabNavigator(
 
 const RootNavigator = createStackNavigator(
     {
-        LOGIN,
         FIRSTPAGE,
+        LOGIN,
     },
     {
         headerMode: 'none', //No headers, like createAnimatedSwitchNavigator

@@ -13,67 +13,97 @@ import SkeletonDetail from '../components/Skeleton';
 
 //import SkeletonDetail from '../../../components/SkeletonDetail';
 
-const HomeScreen = ({ errorText, ...props }) => {
+const HomeScreen = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [responseData, setResponseData] = useState([]);
-    const [isModalVisible, setModalVisible] = useState(false)
-    const [base64Image, setBase64Image] = useState(null);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0)
-    const [images, setImages] = useState([])
+    const [sendedState, setSendedState] = useState(false);
 
 
+    useEffect(() => {
 
-    // useEffect(() => {
+        async function fetchMyAPI() {
+            const token = await AsyncStorage.getItem('token');
+            if (token === null) {
+                navigation.navigate('LoginScreen');
+            }
+        }
 
-    //     async function fetchMyAPI() {
-    //         const token = await AsyncStorage.getItem('token');
-    //         await axios({
-    //             method: 'POST', url: `${api_url}/getRestaurantMenuPicturesByRestaurantId/${props.itemId}`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-    //         })
-    //             .then(response => {
-    //                 setResponseData(response.data);
-    //                 setIsLoading(false);
-    //                 setBase64Image(`data:image/png;base64,${response.data.restaurantCoverPicture}`);
+        fetchMyAPI()
 
-    //             })
-    //             .catch(error => {
-    //                 navigate('FirstpageScreen');
-    //                 return error
-    //             });
-    //     }
+    }, []);
 
-    //     fetchMyAPI()
+    useEffect(() => {
+
+        async function fetchMyAPI() {
+            const token = await AsyncStorage.getItem('token');
+            await axios({
+                method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserNotification`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    console.log(response.data, 'not res')
+                    setResponseData(response.data);
+                    setIsLoading(false);
+
+                })
+                .catch(error => {
+                    navigate('LoginScreen');
+                    return error
+                });
+        }
+
+        fetchMyAPI()
 
 
-    // }, []);
+    }, [sendedState]);
 
-    const RightAction = (progress, dragX) => {
+    const doneJob = async (id) => {
+        console.log(id, 'done job');
+        const token = await AsyncStorage.getItem('token');
+        await axios({
+            method: 'PUT', url: `https://kendinsoyle-admin-service.herokuapp.com/updateNotificationState/${id}`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+        })
+            .then(response => {
+                console.log(response.data, 'tamamlandı');
+                setSendedState(!sendedState)
+                //setModalVisible(false)
+                //setSendCommentAction(true)
+
+            })
+            .catch(error => {
+                console.log(error, 'tamamlandı hata error');
+                return error
+            });
+    }
+
+    const RightAction = (id) => {
 
         return (
-            <View
-                style={{
-                    backgroundColor: '#DE3C4B',
-                    justifyContent: 'center',
-                    marginTop: 5,
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexDirection: 'row',
-                    paddingVertical: 20,
-                    paddingHorizontal: 15,
-                    shadowColor: '#ede6e6',
-                    shadowOpacity: 0.1,
-                    flex: 1
-                }}>
-                <Animated.Text
+            <TouchableOpacity onPress={() => doneJob(id)}>
+                <View
                     style={{
-                        color: 'white',
-                        paddingHorizontal: 10,
-                        fontWeight: '600',
-                        // transform: [{ scale }]
-                    }}>
-                    Tamamlandı
-            </Animated.Text>
-            </View>
+                        backgroundColor: '#DE3C4B',
+                        justifyContent: 'center',
+                        marginTop: 5,
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexDirection: 'row',
+                        paddingVertical: 20,
+                        paddingHorizontal: 15,
+                        shadowColor: '#ede6e6',
+                        shadowOpacity: 0.1,
+                        flex: 1
+                    }}
+                >
+                    <Animated.Text
+                        style={{
+                            color: 'white',
+                            paddingHorizontal: 10,
+                            fontWeight: '600',
+                        }}>
+                        Tamamlandı
+             </Animated.Text>
+                </View>
+            </TouchableOpacity>
         )
     }
 
@@ -87,35 +117,59 @@ const HomeScreen = ({ errorText, ...props }) => {
                     <Title style={{ color: '#f9f7f7' }}>Bildirimler</Title>
                 </View>
             </View>
-            <View style={{ backgroundColor: '#ede8e8' }}>
-                <Swipeable key="1" renderRightActions={() => RightAction()}>
-                    <View style={{
-                        width: '100%',
-                        marginTop: 5,
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        flexDirection: 'row',
-                        backgroundColor: '#f9f7f7',
-                        paddingVertical: 20,
-                        paddingHorizontal: 15,
-                        borderRadius: 7,
-                        shadowColor: '#ede6e6',
-                        shadowOpacity: 0.1,
-                        elevation: 2,
-                        shadowOffset: {
-                            width: 0,
-                            height: 3,
-                        },
-                    }}>
-                        <View style={{ width: '60%' }}>
-                            <Text style={{ fontSize: 15, fontWeight: '600' }}>
-                                Bildirim
-                                </Text>
-                        </View>
+            {responseData && responseData.map((notification, index) => {
 
+                return (
+                    <View >
+                        <Swipeable key={index} renderRightActions={() => RightAction(notification.notification.id)}>
+                            <View style={{
+                                width: '100%',
+                                marginTop: 5,
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                flexDirection: 'row',
+                                backgroundColor: '#f9f7f7',
+                                paddingVertical: 20,
+                                paddingHorizontal: 15,
+                                borderRadius: 7,
+                                shadowColor: '#ede6e6',
+                                shadowOpacity: 0.1,
+                                elevation: 2,
+                                shadowOffset: {
+                                    width: 0,
+                                    height: 3,
+                                },
+                            }}>
+                                {notification.order === null &&
+                                    <View style={{ width: '100%', alignItems: 'flex-start', justifyContent: 'center', fontWeight: 'bold' }}>
+                                        <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
+                                            {notification.notification.tableId} numaralı masa sizi çağırıyor.
+                                    </Text>
+                                    </View>
+                                }
+                                {notification.order &&
+                                    <View style={{ width: '100%', alignItems: 'flex-start', justifyContent: 'center', fontWeight: 'bold' }}>
+                                        <Text style={{ fontSize: 17, fontWeight: 'bold', paddingBottom: 5 }}>
+                                            {notification.notification.tableId} numaralı masa sipariş verdi.
+                                        </Text>
+                                        {notification.order && notification.order.orderDetails && notification.order.orderDetails.map(detail => {
+                                            return (
+                                                <View style={{ paddingVertical: 3 }}>
+                                                    <Text style={{ fontSize: 15, fontWeight: '600' }}>
+                                                        {detail.itemName} ({detail.itemDescription})
+                                                     </Text>
+                                                </View>
+                                            )
+                                        })}
+
+                                    </View>
+                                }
+                            </View>
+                        </Swipeable>
                     </View>
-                </Swipeable>
-            </View>
+                )
+            })}
+
         </View >
     )
 }

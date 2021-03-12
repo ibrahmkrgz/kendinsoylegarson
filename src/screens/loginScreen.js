@@ -1,6 +1,8 @@
 import React, { memo, useState, useEffect, useRef } from 'react';
 import { TouchableOpacity, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import axios from 'axios';
 import Background from '../components/Background';
+import AsyncStorage from '@react-native-community/async-storage';
 //import Logo from '../../components/Logo';
 import Header from '../components/Header';
 import Button from '../components/Button';
@@ -38,24 +40,11 @@ export const toastr = {
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({ value: '', error: '' });
     const [password, setPassword] = useState({ value: '', error: '' });
+    const [errorMessages, setErrorMessages] = useState(false)
+    const [buttonLoading, setButtonLoading] = useState(false)
     //const [buttonLoading, setButtonLoading] = useState(authState);
     const [token, setToken] = useState(null)
     const mounted = useRef();
-
-    // useEffect(() => {
-    //     if (!mounted.current) {
-    //         resetAuth()
-    //         mounted.current = true;
-    //     }
-    //     // else {
-    //     //   if (authState === 'Credentials are wrong or empty.') {
-    //     //     console.log(authState, "basarılı 3434")
-    //     //     //Toast.show('This is a toast.', Toast.LONG, Toast.TOP);
-    //     //     toastr.showSuccess('Hata var kral');
-
-    //     //   }
-    //     // }
-    // });
 
     useEffect(() => {
 
@@ -78,12 +67,34 @@ const LoginScreen = ({ navigation }) => {
         const passwordError = passwordValidator(password.value);
 
         if (passwordError) {
-            //setEmail({ ...email, error: emailError });
+            setEmail({ ...email, error: emailError });
             setPassword({ ...password, error: passwordError });
             return;
         } else {
             //login(email, password);
-            navigation.navigate('HomeScreen');
+            const params = {
+                username: email.value,
+                password: password.value,
+            };
+            console.log(params, 'auth params')
+            setButtonLoading(true)
+            axios
+                .post(`https://kendinsoyle-admin-service.herokuapp.com/authenticate`, params)
+                .then(response => {
+                    console.log(response.data.token, 'response token asd');
+                    AsyncStorage.setItem('token', response.data.token);
+                    setErrorMessages(false)
+                    setButtonLoading(false)
+                    navigation.navigate('HomeScreen');
+                    // return response
+                })
+                .catch(error => {
+                    console.log(error, 'response token error');
+                    setErrorMessages(true)
+                    setButtonLoading(false)
+                    return error
+                });
+            // navigation.navigate('HomeScreen');
         }
 
         //navigation.navigate('LoginHomeScreen');
@@ -119,29 +130,11 @@ const LoginScreen = ({ navigation }) => {
                 errorText={password.error}
                 secureTextEntry
             />
-
-            {/* <View style={styles.forgotPassword}>
-        <TouchableOpacity
-          onPress={() => navigate('ForgotPasswordScreen')}
-        >
-          <Text style={styles.label}>Forgot your password?</Text>
-        </TouchableOpacity>
-      </View> */}
-            {/* {authState && authState.data && authState.data === 'Credentials are wrong or empty.' && (
-                <View>
-                    <Text
-                        style={[
-                            styles.loginTextStyle,
-                            { color: '#DE3C4B' },
-                        ]}>
-                        Kullanıcı adı veya şifre hatalı.
-              </Text>
-                </View>
-            )} */}
+            {errorMessages && <Text style={{ color: '#DE3C4B' }}>Kullanıcı adı veya şifre hatalı!</Text>}
 
             <Button
                 mode="contained"
-                //loading={authState && authState.logging}
+                loading={buttonLoading}
                 onPress={_onLoginPressed}>
                 Giriş Yap
       </Button>
