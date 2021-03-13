@@ -46,7 +46,7 @@ const HomeScreen = ({ navigation }) => {
 
                 })
                 .catch(error => {
-                    navigate('LoginScreen');
+                    navigation.navigate('LoginScreen');
                     return error
                 });
         }

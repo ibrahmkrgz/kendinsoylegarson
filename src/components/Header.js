@@ -14,9 +14,11 @@ const styles = StyleSheet.create({
     },
     titleWrapperText: {
         fontSize: 35,
-        fontFamily: 'PlayfairDisplay-Italic',
+        //fontFamily: 'PlayfairDisplay-Italic',
         //fontFamily: 'Yellowtail-Regular',
         //fontFamily: 'Lobster-Regular',
+        //fontFamily: 'AvenirNext-Medium',
+        fontFamily: 'Yellowtail-Regular',
         color: DefaultTheme.primaryWhite,
         marginBottom: 10,
         width: DefaultTheme.deviceWidth / 1.5,

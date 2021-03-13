@@ -106,7 +106,7 @@ const LoginScreen = ({ navigation }) => {
 
             {/* <Logo /> */}
 
-            <Header mode='header'>Kendin Söyle</Header>
+            <Header mode='header'>KendinSöyle</Header>
 
             <TextInput
                 label="Kullanıcı adı"
