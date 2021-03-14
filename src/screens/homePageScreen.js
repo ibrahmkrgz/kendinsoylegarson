@@ -114,13 +114,15 @@ const HomeScreen = ({ navigation }) => {
             <View style={{ backgroundColor: '#DE3C4B', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, paddingHorizontal: 10 }}>
 
                 <View>
-                    <Title style={{ color: '#f9f7f7' }}>Bildirimler</Title>
+                    <Title style={{
+                        color: '#f9f7f7', fontFamily: 'AvenirNext-Medium', fontSize: 23, fontWeight: 'bold'
+                    }}>Bildirimler</Title>
                 </View>
             </View>
             {responseData && responseData.map((notification, index) => {
 
                 return (
-                    <View >
+                    <View style={{ paddingVertical: 3 }}>
                         <Swipeable key={index} renderRightActions={() => RightAction(notification.notification.id)}>
                             <View style={{
                                 width: '100%',
@@ -128,20 +130,20 @@ const HomeScreen = ({ navigation }) => {
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
                                 flexDirection: 'row',
-                                backgroundColor: '#f9f7f7',
+                                backgroundColor: '#f4e8e9',
                                 paddingVertical: 20,
                                 paddingHorizontal: 15,
                                 borderRadius: 7,
                                 shadowColor: '#ede6e6',
                                 shadowOpacity: 0.1,
-                                elevation: 2,
+                                elevation: 5,
                                 shadowOffset: {
                                     width: 0,
                                     height: 3,
                                 },
                             }}>
                                 {notification.order === null &&
-                                    <View style={{ width: '100%', alignItems: 'flex-start', justifyContent: 'center', fontWeight: 'bold' }}>
+                                    <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
                                         <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
                                             {notification.notification.tableId} numaralı masa sizi çağırıyor.
                                     </Text>

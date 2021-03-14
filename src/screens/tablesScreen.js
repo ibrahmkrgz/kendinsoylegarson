@@ -6,130 +6,142 @@ import { Title } from 'native-base';
 import { connect } from 'react-redux';
 import { navigate } from '../services/navigationService';
 import { withNavigation } from 'react-navigation';
+import Button from '../components/Button';
 //import { api_url } from '../../../redux/actions/constants';
 import { Divider } from 'react-native-paper';
 import SkeletonDetail from '../components/Skeleton';
 
 //import SkeletonDetail from '../../../components/SkeletonDetail';
 
-const TableScreen = ({ errorText, ...props }) => {
+const TableScreen = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [responseData, setResponseData] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false)
-    const [base64Image, setBase64Image] = useState(null);
+    const [tableAction, setTableAction] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [images, setImages] = useState([])
 
 
+    useEffect(() => {
 
-    // useEffect(() => {
+        async function fetchMyAPI() {
+            const token = await AsyncStorage.getItem('token');
+            await axios({
+                method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserResponsibleTables`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    console.log(response.data, 'not table')
+                    setResponseData(response.data);
+                    setIsLoading(false);
 
-    //     async function fetchMyAPI() {
-    //         const token = await AsyncStorage.getItem('token');
-    //         await axios({
-    //             method: 'POST', url: `${api_url}/getRestaurantMenuPicturesByRestaurantId/${props.itemId}`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-    //         })
-    //             .then(response => {
-    //                 setResponseData(response.data);
-    //                 setIsLoading(false);
-    //                 setBase64Image(`data:image/png;base64,${response.data.restaurantCoverPicture}`);
+                })
+                .catch(error => {
+                    navigation.navigate('HomeScreen');
+                    return error
+                });
+        }
 
-    //             })
-    //             .catch(error => {
-    //                 navigate('FirstpageScreen');
-    //                 return error
-    //             });
-    //     }
-
-    //     fetchMyAPI()
+        fetchMyAPI()
 
 
-    // }, []);
+    }, [tableAction]);
 
-    console.log(responseData, 'zeynom menuu')
+    const logout = async () => {
+        await AsyncStorage.removeItem('token');
+        navigation.navigate('LoginScreen');
+    }
+
+    const removeTable = async (id) => {
+        console.log(id, 'removeid')
+        const token = await AsyncStorage.getItem('token');
+        await axios({
+            method: 'POST', url: `https://kendinsoyle-admin-service.herokuapp.com/checkOut/${id}`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+        })
+            .then(response => {
+                console.log(response.data, 'removed api');
+                setTableAction(!tableAction)
+
+            })
+            .catch(error => {
+                console.log(error, 'removed api error');
+                return error
+            });
+    }
+
+    console.log(responseData, 'zeynom table')
     return (
-        <View>
-            {/* {isLoading && <SkeletonDetail />} */}
-            <View style={{ backgroundColor: '#DE3C4B', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, paddingHorizontal: 10 }}>
+        <ScrollView>
 
-                <View>
-                    <Title style={{ color: '#f9f7f7' }}>Masalar</Title>
+            <View>
+                {/* {isLoading && <SkeletonDetail />} */}
+                <View style={{ backgroundColor: '#DE3C4B', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, paddingHorizontal: 10 }}>
+
+                    <View>
+                        <Title style={{
+                            color: '#f9f7f7', fontFamily: 'AvenirNext-Medium', fontSize: 23, fontWeight: 'bold'
+                        }}>Masalar</Title>
+                    </View>
                 </View>
-            </View>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'center' }}>
-                <TouchableOpacity style={{
-                    margin: 10, borderRadius: 10, background: '#fff',
-                    borderColor: '#f9f7f7',
-                    borderWidth: 1,
-                    overflow: 'hidden',
-                    backgroundColor: "#0000",
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.6,
-                    shadowRadius: 2,
-                    elevation: 3
-                }}  >
+                <View style={{ alignItems: 'flex-end', paddingHorizontal: 25 }}>
+                    <Button mode="contained" style={{ alignItems: 'center', justifyContent: 'center', width: 130 }} icon="logout" mode="contained" onPress={logout}>
+                        Çıkış yap
+                </Button>
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'center' }}>
+                    {responseData && responseData.map(table => {
 
-                    <View style={{
-                        alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, backgroundColor: "#fcfcfc", height: 150,
-
-
-                    }}>
-                        <View style={{ paddingVertical: 10 }}>
-                            <View style={{ paddingVertical: 5 }}>
-                                <Text style={{ fontSize: 20, fontFamily: 'Lobster-Regular' }}>
-                                    bildirim
-                        </Text>
+                        return (
+                            <View style={{
+                                margin: 10, borderRadius: 10, background: '#fff',
+                                borderColor: '#f9f7f7',
+                                borderWidth: 1,
+                                overflow: 'hidden',
+                                backgroundColor: "#0000",
+                                shadowColor: '#000',
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowOpacity: 0.6,
+                                shadowRadius: 2,
+                                elevation: 3,
+                                width: '40%'
+                            }}  >
+                                <View style={{ alignItems: 'center', justifyContent: 'flex-start', paddingHorizontal: 10, backgroundColor: table.userCheckIns && table.userCheckIns.length > 0 ? "#DE3C4B" : "#fcfcfc", minHeight: 280 }}>
+                                    <View style={{ paddingVertical: 3 }}>
+                                        <View style={{ paddingVertical: 0 }}>
+                                            <Text style={{ fontSize: 20, fontFamily: 'Lobster-Regular', color: table.userCheckIns && table.userCheckIns.length > 0 ? "#fcfcfc" : "black" }}>
+                                                Masa {table.tableId}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    <View style={{ paddingVertical: 1, fontFamily: 'Lobster-Regular' }}>
+                                        <Text style={{ fontSize: 18, color: '#ccc5c5' }}>{table.userCheckIns && table.userCheckIns.length > 0 ? "Dolu" : "Boş"}</Text>
+                                    </View>
+                                    {table.userCheckIns && table.userCheckIns.map(user => {
+                                        return (
+                                            <View style={{ paddingVertical: 1, fontFamily: 'Lobster-Regular' }}>
+                                                <Text style={{ fontSize: 16, color: '#fcfcfc' }}>{user.username}</Text>
+                                            </View>
+                                        )
+                                    })}
+                                    {table.userCheckIns && table.userCheckIns.length > 0 &&
+                                        <View style={{ alignItems: 'flex-start', paddingHorizontal: 0, position: 'absolute', bottom: 0 }}>
+                                            <Button
+                                                mode="contained"
+                                                icon="logout"
+                                                style={{ width: '100%', backgroundColor: '#cebebe', color: 'black' }}
+                                                labelStyle={{ color: 'black' }}
+                                                onPress={() => removeTable(table.tableId)}
+                                            >
+                                                Kaldır
+                                            </Button>
+                                        </View>
+                                    }
+                                </View>
                             </View>
-                            <View>
-                                <Text style={{ fontSize: 13, color: '#ccc5c5', fontFamily: 'Lobster-Regular' }}>
-                                    detay
-                        </Text>
-                            </View>
-                        </View>
-                        <View style={{ backgroundColor: "#fcfcfc" }}>
-
-                            <View style={{ paddingVertical: 0, fontFamily: 'Lobster-Regular' }}><Text style={{ fontSize: 13, color: '#ccc5c5' }}>₺ iki kişi için</Text></View>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity style={{
-                    margin: 10, borderRadius: 10, background: '#fff',
-                    borderColor: '#f9f7f7',
-                    borderWidth: 1,
-                    overflow: 'hidden',
-                    backgroundColor: "#0000",
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.6,
-                    shadowRadius: 2,
-                    elevation: 3
-                }}  >
-
-                    <View style={{
-                        alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, backgroundColor: "#fcfcfc", height: 150,
-
-                    }}>
-                        <View style={{ paddingVertical: 10 }}>
-                            <View style={{ paddingVertical: 5 }}>
-                                <Text style={{ fontSize: 20, fontFamily: 'Lobster-Regular' }}>
-                                    bildirim
-                        </Text>
-                            </View>
-                            <View>
-                                <Text style={{ fontSize: 13, color: '#ccc5c5', fontFamily: 'Lobster-Regular' }}>
-                                    detay
-                        </Text>
-                            </View>
-                        </View>
-                        <View style={{ backgroundColor: "#fcfcfc" }}>
-
-                            <View style={{ paddingVertical: 0, fontFamily: 'Lobster-Regular' }}><Text style={{ fontSize: 13, color: '#ccc5c5' }}>₺ iki kişi için</Text></View>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            </View>
-        </View >
+                        )
+                    })}
+                </View>
+            </View >
+        </ScrollView>
     )
 }
 const styles = StyleSheet.create({
