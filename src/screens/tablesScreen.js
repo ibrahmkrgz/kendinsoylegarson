@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, BackHandler, Text, Image, ScrollView, Modal } from 'react-native';
+import { View, StyleSheet, Text, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import axios from 'axios';
 import { Title } from 'native-base';
-import { connect } from 'react-redux';
-import { navigate } from '../services/navigationService';
 import { withNavigation } from 'react-navigation';
 import Button from '../components/Button';
 //import { api_url } from '../../../redux/actions/constants';
-import { Divider } from 'react-native-paper';
 import SkeletonDetail from '../components/Skeleton';
 
-//import SkeletonDetail from '../../../components/SkeletonDetail';
 
 const TableScreen = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [responseData, setResponseData] = useState([]);
-    const [isModalVisible, setModalVisible] = useState(false)
     const [tableAction, setTableAction] = useState(false);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0)
-    const [images, setImages] = useState([])
 
 
     useEffect(() => {
@@ -30,7 +23,6 @@ const TableScreen = ({ navigation }) => {
                 method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserResponsibleTables`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
             })
                 .then(response => {
-                    console.log(response.data, 'not table')
                     setResponseData(response.data);
                     setIsLoading(false);
 
@@ -54,7 +46,6 @@ const TableScreen = ({ navigation }) => {
                 method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserResponsibleTables`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
             })
                 .then(response => {
-                    console.log(response.data, 'not table')
                     setResponseData(response.data);
                     setIsLoading(false);
 
@@ -82,13 +73,11 @@ const TableScreen = ({ navigation }) => {
     }
 
     const removeTable = async (id) => {
-        console.log(id, 'removeid')
         const token = await AsyncStorage.getItem('token');
         await axios({
             method: 'POST', url: `https://kendinsoyle-admin-service.herokuapp.com/checkOut/${id}`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
         })
             .then(response => {
-                console.log(response.data, 'removed api');
                 setTableAction(!tableAction)
 
             })
@@ -98,12 +87,11 @@ const TableScreen = ({ navigation }) => {
             });
     }
 
-    console.log(responseData, 'zeynom table')
     return (
         <ScrollView>
 
             <View>
-                {/* {isLoading && <SkeletonDetail />} */}
+                {isLoading && <SkeletonDetail />}
                 <View style={{ backgroundColor: '#DE3C4B', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, paddingHorizontal: 10 }}>
 
                     <View>

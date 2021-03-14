@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, BackHandler, Text, Image, ScrollView, Animated } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, ScrollView, Animated } from 'react-native';
+import 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable'
 import { Title } from 'native-base';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -7,8 +8,6 @@ import axios from 'axios';
 import { connect } from 'react-redux';
 import { navigate } from '../services/navigationService';
 import { withNavigation } from 'react-navigation';
-//import { api_url } from '../../../redux/actions/constants';
-import { Divider } from 'react-native-paper';
 import SkeletonDetail from '../components/Skeleton';
 
 //import SkeletonDetail from '../../../components/SkeletonDetail';
@@ -33,17 +32,14 @@ const HomeScreen = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
-        console.log("asdasd")
 
         async function fetchMyAPI() {
-            console.log("asdasd 22")
 
             const token = await AsyncStorage.getItem('token');
             await axios({
                 method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserNotification`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
             })
                 .then(response => {
-                    console.log(response.data, 'not res')
                     setResponseData(response.data);
                     setIsLoading(false);
 
@@ -59,17 +55,14 @@ const HomeScreen = ({ navigation }) => {
     }, [sendedState]);
 
     useEffect(() => {
-        console.log("asdasd")
 
         async function fetchMyAPI() {
-            console.log("asdasd 22")
 
             const token = await AsyncStorage.getItem('token');
             await axios({
                 method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserNotification`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
             })
                 .then(response => {
-                    console.log(response.data, 'not res')
                     setResponseData(response.data);
                     setIsLoading(false);
 
@@ -91,13 +84,11 @@ const HomeScreen = ({ navigation }) => {
     }, []);
 
     const doneJob = async (id) => {
-        console.log(id, 'done job');
         const token = await AsyncStorage.getItem('token');
         await axios({
             method: 'PUT', url: `https://kendinsoyle-admin-service.herokuapp.com/updateNotificationState/${id}`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
         })
             .then(response => {
-                console.log(response.data, 'tamamlandı');
                 setSendedState(!sendedState)
                 //setModalVisible(false)
                 //setSendCommentAction(true)
@@ -110,10 +101,10 @@ const HomeScreen = ({ navigation }) => {
     }
 
     const RightAction = (id) => {
-
         return (
-            <TouchableOpacity onPress={() => doneJob(id)}>
+            <TouchableOpacity key={id} onPress={() => doneJob(id)}>
                 <View
+                    key={id}
                     style={{
                         backgroundColor: '#DE3C4B',
                         justifyContent: 'center',
@@ -129,6 +120,7 @@ const HomeScreen = ({ navigation }) => {
                     }}
                 >
                     <Animated.Text
+                        key={id}
                         style={{
                             color: 'white',
                             paddingHorizontal: 10,
@@ -141,11 +133,10 @@ const HomeScreen = ({ navigation }) => {
         )
     }
 
-    console.log(responseData, 'zeynom menuu')
     return (
         <ScrollView>
             <View>
-                {/* {isLoading && <SkeletonDetail />} */}
+                {isLoading && <SkeletonDetail />}
                 <View style={{ backgroundColor: '#DE3C4B', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, paddingHorizontal: 10 }}>
 
                     <View>
@@ -155,28 +146,29 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                 </View>
                 {responseData && responseData.map((notification, index) => {
-
                     return (
                         <View style={{ paddingVertical: 3 }}>
                             <Swipeable key={`${notification.notification.id}-${notification.notification.createdTime}`} renderRightActions={() => RightAction(notification.notification.id)}>
-                                <View style={{
-                                    width: '100%',
-                                    marginTop: 5,
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    flexDirection: 'row',
-                                    backgroundColor: '#f4e8e9',
-                                    paddingVertical: 20,
-                                    paddingHorizontal: 15,
-                                    borderRadius: 7,
-                                    shadowColor: '#ede6e6',
-                                    shadowOpacity: 0.1,
-                                    elevation: 5,
-                                    shadowOffset: {
-                                        width: 0,
-                                        height: 3,
-                                    },
-                                }}>
+                                <View
+                                    key={`${notification.notification.id}-${notification.notification.createdTime}`}
+                                    style={{
+                                        width: '100%',
+                                        marginTop: 5,
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        flexDirection: 'row',
+                                        backgroundColor: '#f4e8e9',
+                                        paddingVertical: 20,
+                                        paddingHorizontal: 15,
+                                        borderRadius: 7,
+                                        shadowColor: '#ede6e6',
+                                        shadowOpacity: 0.1,
+                                        elevation: 5,
+                                        shadowOffset: {
+                                            width: 0,
+                                            height: 3,
+                                        },
+                                    }}>
                                     {notification.order === null &&
                                         <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
                                             <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
