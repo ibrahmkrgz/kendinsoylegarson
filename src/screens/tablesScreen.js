@@ -46,6 +46,36 @@ const TableScreen = ({ navigation }) => {
 
     }, [tableAction]);
 
+    useEffect(() => {
+
+        async function fetchMyAPI() {
+            const token = await AsyncStorage.getItem('token');
+            await axios({
+                method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserResponsibleTables`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    console.log(response.data, 'not table')
+                    setResponseData(response.data);
+                    setIsLoading(false);
+
+                })
+                .catch(error => {
+                    navigation.navigate('HomeScreen');
+                    return error
+                });
+        }
+
+        const intervalId = setInterval(() => {  //assign interval to a variaable to clear it
+            fetchMyAPI()
+        }, 30000)
+
+        return () => {
+            clearInterval(intervalId); //This is important
+        }
+
+
+    }, []);
+
     const logout = async () => {
         await AsyncStorage.removeItem('token');
         navigation.navigate('LoginScreen');

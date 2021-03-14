@@ -33,8 +33,11 @@ const HomeScreen = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
+        console.log("asdasd")
 
         async function fetchMyAPI() {
+            console.log("asdasd 22")
+
             const token = await AsyncStorage.getItem('token');
             await axios({
                 method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserNotification`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
@@ -53,8 +56,39 @@ const HomeScreen = ({ navigation }) => {
 
         fetchMyAPI()
 
-
     }, [sendedState]);
+
+    useEffect(() => {
+        console.log("asdasd")
+
+        async function fetchMyAPI() {
+            console.log("asdasd 22")
+
+            const token = await AsyncStorage.getItem('token');
+            await axios({
+                method: 'GET', url: `https://kendinsoyle-admin-service.herokuapp.com/getUserNotification`, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    console.log(response.data, 'not res')
+                    setResponseData(response.data);
+                    setIsLoading(false);
+
+                })
+                .catch(error => {
+                    navigation.navigate('LoginScreen');
+                    return error
+                });
+        }
+
+        const intervalId = setInterval(() => {  //assign interval to a variaable to clear it
+            fetchMyAPI()
+        }, 30000)
+
+        return () => {
+            clearInterval(intervalId); //This is important
+        }
+
+    }, []);
 
     const doneJob = async (id) => {
         console.log(id, 'done job');
@@ -109,70 +143,72 @@ const HomeScreen = ({ navigation }) => {
 
     console.log(responseData, 'zeynom menuu')
     return (
-        <View>
-            {/* {isLoading && <SkeletonDetail />} */}
-            <View style={{ backgroundColor: '#DE3C4B', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, paddingHorizontal: 10 }}>
+        <ScrollView>
+            <View>
+                {/* {isLoading && <SkeletonDetail />} */}
+                <View style={{ backgroundColor: '#DE3C4B', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, paddingHorizontal: 10 }}>
 
-                <View>
-                    <Title style={{
-                        color: '#f9f7f7', fontFamily: 'AvenirNext-Medium', fontSize: 23, fontWeight: 'bold'
-                    }}>Bildirimler</Title>
-                </View>
-            </View>
-            {responseData && responseData.map((notification, index) => {
-
-                return (
-                    <View style={{ paddingVertical: 3 }}>
-                        <Swipeable key={index} renderRightActions={() => RightAction(notification.notification.id)}>
-                            <View style={{
-                                width: '100%',
-                                marginTop: 5,
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                flexDirection: 'row',
-                                backgroundColor: '#f4e8e9',
-                                paddingVertical: 20,
-                                paddingHorizontal: 15,
-                                borderRadius: 7,
-                                shadowColor: '#ede6e6',
-                                shadowOpacity: 0.1,
-                                elevation: 5,
-                                shadowOffset: {
-                                    width: 0,
-                                    height: 3,
-                                },
-                            }}>
-                                {notification.order === null &&
-                                    <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                                        <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
-                                            {notification.notification.tableId} numaralı masa sizi çağırıyor.
-                                    </Text>
-                                    </View>
-                                }
-                                {notification.order &&
-                                    <View style={{ width: '100%', alignItems: 'flex-start', justifyContent: 'center', fontWeight: 'bold' }}>
-                                        <Text style={{ fontSize: 17, fontWeight: 'bold', paddingBottom: 5 }}>
-                                            {notification.notification.tableId} numaralı masa sipariş verdi.
-                                        </Text>
-                                        {notification.order && notification.order.orderDetails && notification.order.orderDetails.map(detail => {
-                                            return (
-                                                <View style={{ paddingVertical: 3 }}>
-                                                    <Text style={{ fontSize: 15, fontWeight: '600' }}>
-                                                        {detail.itemName} ({detail.itemDescription})
-                                                     </Text>
-                                                </View>
-                                            )
-                                        })}
-
-                                    </View>
-                                }
-                            </View>
-                        </Swipeable>
+                    <View>
+                        <Title style={{
+                            color: '#f9f7f7', fontFamily: 'AvenirNext-Medium', fontSize: 23, fontWeight: 'bold'
+                        }}>Bildirimler</Title>
                     </View>
-                )
-            })}
+                </View>
+                {responseData && responseData.map((notification, index) => {
 
-        </View >
+                    return (
+                        <View style={{ paddingVertical: 3 }}>
+                            <Swipeable key={`${notification.notification.id}-${notification.notification.createdTime}`} renderRightActions={() => RightAction(notification.notification.id)}>
+                                <View style={{
+                                    width: '100%',
+                                    marginTop: 5,
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    flexDirection: 'row',
+                                    backgroundColor: '#f4e8e9',
+                                    paddingVertical: 20,
+                                    paddingHorizontal: 15,
+                                    borderRadius: 7,
+                                    shadowColor: '#ede6e6',
+                                    shadowOpacity: 0.1,
+                                    elevation: 5,
+                                    shadowOffset: {
+                                        width: 0,
+                                        height: 3,
+                                    },
+                                }}>
+                                    {notification.order === null &&
+                                        <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                                            <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
+                                                {notification.notification.tableId} numaralı masa sizi çağırıyor.
+                                    </Text>
+                                        </View>
+                                    }
+                                    {notification.order &&
+                                        <View style={{ width: '100%', alignItems: 'flex-start', justifyContent: 'center', fontWeight: 'bold' }}>
+                                            <Text style={{ fontSize: 17, fontWeight: 'bold', paddingBottom: 5 }}>
+                                                {notification.notification.tableId} numaralı masa sipariş verdi.
+                                        </Text>
+                                            {notification.order && notification.order.orderDetails && notification.order.orderDetails.map(detail => {
+                                                return (
+                                                    <View style={{ paddingVertical: 3 }}>
+                                                        <Text style={{ fontSize: 15, fontWeight: '600' }}>
+                                                            {detail.itemName} ({detail.itemDescription})
+                                                     </Text>
+                                                    </View>
+                                                )
+                                            })}
+
+                                        </View>
+                                    }
+                                </View>
+                            </Swipeable>
+                        </View>
+                    )
+                })}
+
+            </View >
+        </ScrollView>
     )
 }
 const styles = StyleSheet.create({
