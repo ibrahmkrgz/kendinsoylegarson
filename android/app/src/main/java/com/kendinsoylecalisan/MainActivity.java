@@ -16,7 +16,11 @@ public class MainActivity extends ReactActivity {
     super.onCreate(savedInstanceState);
   }
 
-  
+ @Override
+  protected String getMainComponentName() {
+    return "KendinSoyleCalisan";
+  }
+
    @Override
   protected ReactActivityDelegate createReactActivityDelegate() {
     return new ReactActivityDelegate(this, getMainComponentName()) {
