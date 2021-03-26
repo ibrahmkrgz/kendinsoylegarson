@@ -9,6 +9,7 @@ import Button from '../components/Button';
 import TextInput from '../components/TextInput';
 import { theme } from '../themes/theme';
 import { Toast } from 'native-base';
+import SplashScreen from 'react-native-splash-screen';
 import { emailValidator, passwordValidator } from '../config/utils';
 
 export const toastr = {
@@ -45,6 +46,11 @@ const LoginScreen = ({ navigation }) => {
     //const [buttonLoading, setButtonLoading] = useState(authState);
     const [token, setToken] = useState(null)
     const mounted = useRef();
+
+    useEffect(() => {
+        console.log("hideeee")
+        SplashScreen.hide();
+    }, []);
 
     useEffect(() => {
 
@@ -137,7 +143,7 @@ const LoginScreen = ({ navigation }) => {
                 loading={buttonLoading}
                 onPress={_onLoginPressed}>
                 Giriş Yap
-      </Button>
+            </Button>
 
         </Background>
     );
